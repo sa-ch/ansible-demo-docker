@@ -1,0 +1,44 @@
+- name: Docker Build
+  hosts: srv-02.rhlab.ch
+  vars:
+   - docroot: /var/www/serversforhackers.com/public
+  tasks:
+  - name: whoami
+    command: whoami
+  - name: enable rhel-7-server-extras-rpms repsitory
+    command: subscription-manager repos --enable rhel-7-server-extras-rpms
+  - name: python package installed
+    yum: name=python state=latest
+  - name: docker-python package installed
+    yum: name=docker-python state=latest
+  - name: docker package installed
+    yum: name=docker state=latest
+    notify: 
+     - Start docker
+  - name: Start docker
+    service: name=docker state=started enabled=yes
+  - name: pull httpd image
+    docker_image:
+      name: registry.access.redhat.com/rhscl/httpd-24-rhel7
+  - name: Tag Image
+    docker_image:
+      name: registry.access.redhat.com/rhscl/httpd-24-rhel7
+      tag: httpd-rhel7
+  - name: stop / remove container
+    docker:
+      name: mywebserver
+      image: rhscl/httpd-24-rhel7
+      state: absent
+  - name: application container
+    docker:
+      name: mywebserver
+      image: rhscl/httpd-24-rhel7
+      state: reloaded
+      pull: always
+      ports:
+      - "8080:9000"
+
+  handlers:
+  - name: Start docker
+    service: name=docker state=started enabled=yes
+

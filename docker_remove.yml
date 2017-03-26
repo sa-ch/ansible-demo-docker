@@ -1,0 +1,10 @@
+- name: Docker Build
+  hosts: srv-02.rhlab.ch
+  vars:
+   - docroot: /var/www/serversforhackers.com/public
+  tasks:
+  - name: stop / remove container
+    docker:
+      name: mywebserver
+      image: rhscl/httpd-24-rhel7
+      state: absent
